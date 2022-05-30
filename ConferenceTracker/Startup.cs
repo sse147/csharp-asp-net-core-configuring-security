@@ -18,9 +18,10 @@ namespace ConferenceTracker
         {
             Configuration = configuration;
         }
-
+        
         public IConfiguration Configuration { get; }
         public string SecretMessage { get; set; }
+        private readonly string _allowedOrigins = "_allowedOrigins";
 
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -33,15 +34,39 @@ namespace ConferenceTracker
             services.AddRazorPages();
             services.AddTransient<IPresentationRepository, PresentationRepository>();
             services.AddTransient<ISpeakerRepository, SpeakerRepository>();
-        }
+            services.AddCors(options =>
+            {
+                options.AddPolicy(_allowedOrigins,
+                    builder =>
+                    {
+                        builder.WithOrigins("http://pluralsight.com");
+                    });
+
+            });
+
+    }
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {            
-            using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
+            }
+
+                        using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             using (var context = scope.ServiceProvider.GetService<ApplicationDbContext>())
                 context.Database.EnsureCreated();
+
+            app.UseCors(_allowedOrigins);
+
+            app.UseHttpsRedirection();
 
             app.UseStaticFiles();
 
