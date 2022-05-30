@@ -30,6 +30,15 @@ namespace ConferenceTracker
         {
             SecretMessage = Configuration["SecretMessage"];
 
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            }
+
+            );
+
             services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("ConferenceTracker"));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -75,6 +84,9 @@ namespace ConferenceTracker
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
+
+
+            app.UseCookiePolicy();
 
             app.UseRouting();
 
