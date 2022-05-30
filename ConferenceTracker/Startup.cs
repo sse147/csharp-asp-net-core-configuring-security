@@ -52,6 +52,7 @@ namespace ConferenceTracker
         {            
             if (env.IsDevelopment())
             {
+                app.UseDatabaseErrorPage();
                 app.UseDeveloperExceptionPage();
             }
             else
